@@ -28,15 +28,13 @@ OctoFit Tracker is a three-tier application for a school fitness program. The st
 
 ## Implementation decisions
 
-Record your plan here before editing code.
-
-- Presentation tier decision:
-- Logic tier decision:
-- Data tier decision:
-- Activity tracking approach:
-- Team management approach:
-- Leaderboard approach:
-- Workout suggestions approach:
+- Presentation tier decision: Keep route and display concerns in React components under `src/components`, use the shared `src/api/client.ts` helper for every `/api/*` request, and provide explicit loading, success, empty, and accessible error states. The workout view will request suggestions by the seeded Mona email and render its returned workout data.
+- Logic tier decision: Keep Express route handlers thin: validate and translate HTTP input in `src/routes/api.ts`, delegate persistence and feature calculations to `src/services/octofitService.ts`, and return JSON with deliberate 4xx statuses for expected client or lookup failures rather than allowing 500 cast errors.
+- Data tier decision: Define required Mongoose fields and sensible defaults in `src/models`; run the seed through stable business keys such as email and team name, remove users from a previous team when their team changes, and preserve unrelated existing data.
+- Activity tracking approach: Validate `userId` and `teamId` as ObjectIds before querying, require a matching existing user and team, require valid activity fields, and store computed positive points plus an `occurredAt` timestamp. Reject missing or malformed references with 400 and nonexistent references with another deliberate 4xx.
+- Team management approach: Require `name` and `mascot` at the model and API boundaries, default `members` to an empty array, and preserve submitted names and mascots. Accept member ObjectIds, convert them to model references safely, and expose teams with their member IDs.
+- Leaderboard approach: Aggregate `Activity.points` by team, join or look up team names, sum totals, sort descending, and assign 1-based ranks. Include teams with no activity only if the API contract or existing UI convention requires it; otherwise return entries for teams represented by activity records.
+- Workout suggestions approach: Find the user by decoded email, calculate a focus from the user's `fitnessGoal` or most recent activity type, select a matching workout, and include a human-readable reason. Return a deliberate 404 when no user matches.
 
 ## Test plan
 
