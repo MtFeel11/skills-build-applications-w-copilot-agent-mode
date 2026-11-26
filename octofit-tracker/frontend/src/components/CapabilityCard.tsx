@@ -1,6 +1,8 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { getJson } from '../api/client.js';
 
+
+//Capabilities
 type Props<T> = {
   title: string;
   description: string;
